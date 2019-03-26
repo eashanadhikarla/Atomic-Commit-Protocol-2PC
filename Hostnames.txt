@@ -1,0 +1,5 @@
+server1:dyn146102.cc.lehigh.edu
+server2:dyn146102.cc.lehigh.edu
+server3:dyn146102.cc.lehigh.edu
+server4:dyn146102.cc.lehigh.edu
+server5:dyn146102.cc.lehigh.edu
