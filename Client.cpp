@@ -2,33 +2,37 @@
 #include <libgen.h>
 #include <unistd.h>
 #include <time.h>
-#include <boost/asio.hpp>
 #include <fstream>
 #include <string>
 #include <regex>
 #include <thread>
 #include <vector>
+#include <boost/asio.hpp>
+#include <boost/thread.hpp>
 
 using namespace std;
 using namespace boost::asio;
+//using boost::thread;
 #define BUF_SIZE 256
 
+typedef boost::asio::ip::tcp::socket tcpsock;
 boost::asio::io_service io_serv;
 unsigned int hashIdx;
 bool flag;
-string data, key1, key2, key3, value1, value2, value3;
+// string data,data2,data3, key1, key2, key3, value1, value2, value3; // string try_data1,try_data2,try_data3;
 int put_true,put_false,get_null,get_val,mput_true,mput_fail;
 size_t sum_bytes = 0;
 double sum_ex_time = 0;
 double sum_latency = 0;
+long int sleepTime = 10000L+(long)((1e5-1e4)*rand()/(RAND_MAX+1.0));
+static const int THREAD_COUNT = 10;
 
-/* Auto-generation of transactions. */
+/* Auto-generation of Operations. */
 string get_rand(){
 	int key_range = 1000;
 	int random = rand() % 100;
 	int key = random % key_range;
 	string key_str = to_string(key);
-
   return key_str;
 }
 
@@ -42,27 +46,16 @@ boost::asio::ip::tcp::socket connect_to_server(std::string hostname, std::string
 	return socket;
 }
 
-void get_client(boost::asio::ip::tcp::socket &socket) {
-
-	size_t xBytes = 0;
-	struct timeval start_time, end_time;
-	struct timeval start_time_s, end_time_s;
-	// Start Time.
-	gettimeofday(&start_time, nullptr);
-
-	// Write data to the Socket and send it to the Server.
-	boost::system::error_code ignored_error; 
-	write(socket, buffer(data), ignored_error); 
-	xBytes += data.length();
-
-	gettimeofday(&start_time_s, nullptr);
-     
-	//std::cout << "Server: ";
+bool read(tcpsock &socket){
 	size_t recd = 0;
-	while (recd < data.length()) {
+	bool flag;
+	flag = 1;
+	while (recd < 4) {
 		char buf[256];
+		memset(buf, 0, 256); // Empty the buffer evereytime.
 		string buf_str;
 		// Recieve and read reply from the Server.
+		boost::system::error_code ignored_error; 
 		size_t len = socket.read_some(boost::asio::buffer(buf), ignored_error); 
 		if (len > 0) {
 			recd += len;
@@ -72,8 +65,49 @@ void get_client(boost::asio::ip::tcp::socket &socket) {
 			for(int i=0;i<4;++i){
 				buf_str += buf[i];
 			}
+			// Counting the Results for performance measure.
+			if(buf_str == "lock"){
+				flag = 1;
+				// Continue with next transaction if current is successful
+				// flag = 0;
+			}
+			else if(buf_str == "fals"){
+				flag = 0;
+			}
+		} 
+	}
+	return flag;
+}
+
+void get_client(tcpsock &socket_ref1, tcpsock &socket_rep1, string data) {
+
+	size_t xBytes = 0;
+	struct timeval start_time, end_time;
+	struct timeval start_time_s, end_time_s;
+	// Start Time.
+	gettimeofday(&start_time, nullptr);
+
+	// Write data to the Socket and send it to the Server.
+	boost::system::error_code ignored_error; 
+	write(socket_ref1, buffer(data), ignored_error);
+	xBytes += data.length();
+	gettimeofday(&start_time_s, nullptr);
+	size_t recd = 0;
+	while (recd < data.length()) {
+		char buf[256];
+		string buf_str;
+		// Recieve and read reply from the Server.
+		size_t len = socket_ref1.read_some(boost::asio::buffer(buf), ignored_error); 
+		if (len > 0) {
+			recd += len;
+			buf[len] = 0;
+			cout << buf;
+
+			for(int i=0;i<4;++i){
+				buf_str += buf[i];
+			}
 			if(buf_str == "Null"){
-				get_null++;
+				get_null++; 
 			}
 			else{
 				get_val++;
@@ -95,49 +129,47 @@ void get_client(boost::asio::ip::tcp::socket &socket) {
 	std::cout << std::endl;
 }
 
-void put_client(boost::asio::ip::tcp::socket &socket) {
+bool put_client(tcpsock &socket_ref1, tcpsock &socket_rep1, string key1, string data) {
 
 	size_t xBytes = 0;
 	struct timeval start_time, end_time;
 	struct timeval start_time_s, end_time_s;
-	// Start Time.
-	gettimeofday(&start_time, nullptr);
+	boost::system::error_code ignored_error;
+	string try_data1;
+	try_data1 = "t("+key1+")";
+	gettimeofday(&start_time, nullptr); // Start Time.
 
 	// Write data to the Socket and send it to the Server.
-	boost::system::error_code ignored_error; 
-	write(socket, buffer(data), ignored_error); 
-	xBytes += data.length();
-
-	gettimeofday(&start_time_s, nullptr);
-
-	// std::cout << "Server: ";
-	size_t recd = 0;
-	while (recd < data.length()) {
-		char buf[256];
-		string buf_str;
-		// Recieve and read reply from the Server.
-		size_t len = socket.read_some(boost::asio::buffer(buf), ignored_error); 
-		if (len > 0) {
-			recd += len;
-			buf[len] = 0;
-			cout << buf;
-
-			for(int i=0;i<4;++i){
-				buf_str += buf[i];
-			}
-			// Counting the Results for performance measure.
-			if(buf_str == "true"){
-				put_true++;
-				// Continue with next transaction if current is successful
-				// flag = 0;
-			}
-			else if(buf_str == "false"){
-				put_false++;
-				// Retry if failed
-				// flag = 1;
-			}
-		} 
+	// Prepare Phase | Phase 1
+	write(socket_ref1, buffer(try_data1), ignored_error);
+	bool flag = read(socket_ref1);
+	if(flag == 1){
+		write(socket_rep1, buffer(try_data1), ignored_error); 
+		flag = read(socket_rep1);
+		if(flag == 1){
+			// Commit Phase | Phase 2
+			write(socket_ref1, buffer(data), ignored_error);
+			write(socket_rep1, buffer(data), ignored_error);
+			xBytes += data.length();
+			gettimeofday(&start_time_s, nullptr);
+		}
+		else{
+			try_data1 = "a("+key1+")";
+			write(socket_ref1, buffer(try_data1), ignored_error);
+			usleep(sleepTime);
+			return false;// retry
+		}
 	}
+	else {
+		usleep(sleepTime);
+		return false;// retry
+	}
+	// If successfull commit then abort and unlock.
+	try_data1 = "a("+key1+")";
+	write(socket_ref1, buffer(try_data1), ignored_error);
+	write(socket_rep1, buffer(try_data1), ignored_error);
+	put_true++;
+	
 	gettimeofday(&end_time_s, nullptr);
 	std::cout << std::endl;
 	// End Time
@@ -151,51 +183,127 @@ void put_client(boost::asio::ip::tcp::socket &socket) {
 	sum_latency += latency;
 
 	std::cout << std::endl;
+	return true;
 }
 
-void mput_client(boost::asio::ip::tcp::socket &socket) {
+bool mput_client(tcpsock &socket_ref1, tcpsock &socket_ref2, tcpsock &socket_ref3, tcpsock &socket_rep1, tcpsock &socket_rep2, tcpsock &socket_rep3, string key1, string key2, string key3, string data, string data2, string data3){
 
 	size_t xBytes = 0;
 	struct timeval start_time, end_time;
 	struct timeval start_time_s, end_time_s;
-	// Start Time.
-	gettimeofday(&start_time, nullptr);
+	string try_data1,try_data2,try_data3;
+	try_data1 = "t("+key1+")";
+	try_data2 = "t("+key2+")";
+	try_data3 = "t("+key3+")";
+	gettimeofday(&start_time, nullptr); // Start Time.
 
-	// Write data to the Socket and send it to the Server.
-	boost::system::error_code ignored_error; 
-	write(socket, buffer(data), ignored_error); 
-	xBytes += data.length();
+	// ************************* Actual Node *****************************	
+	boost::system::error_code ignored_error;
+	write(socket_ref1, buffer(try_data1), ignored_error);
+ 	bool flag = read(socket_ref1);
+	if(flag == 1){
+		write(socket_ref2, buffer(try_data2), ignored_error);
+		flag = read(socket_ref2);
+		if(flag == 1){
+			write(socket_ref3, buffer(try_data3), ignored_error);
+			flag = read(socket_ref3);
+			if(flag == 1){
+				// ************************* Replicated Node *****************************
+					write(socket_rep1, buffer(try_data1), ignored_error);
+					flag = read(socket_rep1);
+					if(flag == 1){
+						write(socket_rep2, buffer(try_data2), ignored_error);
+						flag = read(socket_rep2);
+						if(flag == 1){
+							write(socket_rep3, buffer(try_data3), ignored_error);
+							flag = read(socket_rep3);
+							if(flag == 1){
+								// Finally all the 5 nodes are locked.
+								// // ************************* Do the commit *****************************
+								write(socket_ref1, buffer(data), ignored_error); 
+								xBytes += data.length();
+								write(socket_ref2, buffer(data2), ignored_error);
+								//xBytes += data2.length();
+								write(socket_ref3, buffer(data3), ignored_error);
+								//xBytes += data3.length();
+								write(socket_rep1, buffer(data), ignored_error);
+								//xBytes += data2.length();
+								write(socket_rep2, buffer(data2), ignored_error);
+								write(socket_rep3, buffer(data3), ignored_error);
 
-	gettimeofday(&start_time_s, nullptr);
-
-	// std::cout << "Server: ";
-	size_t recd = 0;
-	while (recd < data.length()) {
-		char buf[256];
-		string buf_str;
-		// Recieve and read reply from the Server.
-		size_t len = socket.read_some(boost::asio::buffer(buf), ignored_error); 
-		if (len > 0) {
-			recd += len;
-			buf[len] = 0;
-			cout << buf;
-
-			for(int i=0;i<4;++i){
-				buf_str += buf[i];
+								gettimeofday(&start_time_s, nullptr);
+							}
+							else{
+								try_data1 = "a("+key1+")";
+								try_data2 = "a("+key2+")";
+								try_data3 = "a("+key3+")";
+								// Unlocking
+								write(socket_ref1, buffer(try_data1), ignored_error);
+								write(socket_ref2, buffer(try_data2), ignored_error);
+								write(socket_ref3, buffer(try_data3), ignored_error);
+								write(socket_rep1, buffer(try_data1), ignored_error);
+								write(socket_rep2, buffer(try_data2), ignored_error);
+								usleep(sleepTime);
+								return false;// retry
+							}
+						}
+						else {
+							try_data1 = "a("+key1+")";
+							try_data2 = "a("+key2+")";
+							try_data3 = "a("+key3+")";
+							write(socket_ref1, buffer(try_data1), ignored_error);
+							write(socket_ref2, buffer(try_data2), ignored_error);
+							write(socket_ref3, buffer(try_data3), ignored_error);
+							write(socket_rep1, buffer(try_data1), ignored_error);
+							usleep(sleepTime);
+							return false;// retry
+						}
+					}
+					else{
+						try_data1 = "a("+key1+")";
+						try_data2 = "a("+key2+")";
+						try_data3 = "a("+key3+")";
+						write(socket_ref1, buffer(try_data1), ignored_error);
+						write(socket_ref2, buffer(try_data2), ignored_error);
+						write(socket_ref3, buffer(try_data3), ignored_error);
+						usleep(sleepTime);
+						return false;// retry
+					}
 			}
-			// Counting the Results for performance measure.
-			if(buf_str == "true"){
-				mput_true++;
-				// Continue with next transaction if current is successful
-				// flag = 0;
+			else{
+				try_data1 = "a("+key1+")";
+				try_data2 = "a("+key2+")";
+				write(socket_ref1, buffer(try_data1), ignored_error);
+				write(socket_ref2, buffer(try_data2), ignored_error);
+				usleep(sleepTime);
+				return false;// retry
 			}
-			else if(buf_str == "false"){
-				mput_fail++;
-				// Retry if failed
-				// flag = 1;
-			}
-		} 
+		}
+		else{
+			try_data1 = "a("+key1+")";
+			write(socket_ref1, buffer(try_data1), ignored_error);
+			usleep(sleepTime);
+			return false;// retry
+		}
 	}
+	else {
+		usleep(sleepTime);
+		// retry
+		return false;
+	}
+	
+	// Successfull PUT operation, so send abort to unlock.
+	try_data1 = "a("+key1+")";
+	try_data2 = "a("+key2+")";
+	try_data3 = "a("+key3+")";
+	write(socket_ref1, buffer(try_data1), ignored_error);
+	write(socket_ref2, buffer(try_data2), ignored_error);
+	write(socket_ref3, buffer(try_data3), ignored_error);
+	write(socket_rep1, buffer(try_data1), ignored_error);
+	write(socket_rep2, buffer(try_data2), ignored_error);
+	write(socket_rep3, buffer(try_data3), ignored_error);
+	put_true = put_true+6;
+	
 	gettimeofday(&end_time_s, nullptr);
 	std::cout << std::endl;
 	// End Time
@@ -207,21 +315,24 @@ void mput_client(boost::asio::ip::tcp::socket &socket) {
 	sum_bytes += xBytes;
 	sum_ex_time += ex_time;
 	sum_latency += latency;
-
 	std::cout << std::endl;
+	return true;
 }
 
 int main(int argc, char *argv[]) {
 
+	//thread *threads[THREAD_COUNT];
+
+	string data,data2,data3, key1, key2, key3, value1, value2, value3;
+
 	srand(time(NULL));
-	string ports = "8080"; 
+	string ports = "9000"; 
 	// string server_ip_connect = "localhost";
 	std::vector<string> servers_ip;
 
 	// Read the list of Hostnames from a text file.
 	ifstream file;
 	file.open("Hostnames.txt", ios::in);
-
 	string eachLine;
 	while(getline(file,eachLine)){
 		if(eachLine.empty()){
@@ -230,10 +341,11 @@ int main(int argc, char *argv[]) {
 		string the_ip = eachLine.substr(8);
 		servers_ip.push_back(the_ip);
 	}
-    
 	file.close();
 
-    // Opening 5 sockets for connecting it to 5 nodes.
+	
+
+  // Opening 5 sockets for connecting it to 5 nodes.
 	// auto socket = connect_to_server(server_ip_connect, ports);
 	auto socket1 = connect_to_server(servers_ip[0], ports);
 	auto socket2 = connect_to_server(servers_ip[1], ports); 
@@ -249,21 +361,7 @@ int main(int argc, char *argv[]) {
 	socket_list.push_back(&socket4);
 	socket_list.push_back(&socket5);
 	
-    // read from stdin as long as it isn't EOF, send to server, print reply
-	
-	for (int i = 0; i < 100; i++){
-        hash<string> hash_fn;
-		size_t hash_key = hash_fn(key1);
-		// hashIdx = hash_key % 500;
-
-		auto socket_ind = hash_key % 5;
-		auto socket_rep_ind = socket_ind + 1;
-		if (socket_rep_ind > 5) socket_rep_ind = 0;
-		// socket_rep_ind = (socket_ind + 1) % 5 //TOM
-
-		auto &socket_ref = socket_list[socket_ind];
-		auto &socket_rep = socket_list[socket_rep_ind];
-
+	for (int i = 0; i < 1000; i++){
 		key1 = get_rand();
 		value1 = get_rand();
 
@@ -273,27 +371,59 @@ int main(int argc, char *argv[]) {
 		key3 = get_rand();
 		value3 = get_rand();
 		int random = rand(); 
+
+    hash<string> hash_fn;
+		size_t hash_key1 = hash_fn(key1);
+		size_t hash_key2 = hash_fn(key2);
+		size_t hash_key3 = hash_fn(key3);
+		// hashIdx = hash_key % 500;
+
+		// Sockets are hashed on the basis of 5 nodes and direected towards its respetive socket. 
+		auto socket_ind1 = hash_key1 % 5;
+		auto socket_rep_ind1 = socket_ind1 + 1;
+		if (socket_rep_ind1 > 5) socket_rep_ind1 = 0; // socket_rep_ind = (socket_ind + 1) % 5 
+		auto &socket_ref1 = socket_list[socket_ind1];
+		auto &socket_rep1 = socket_list[socket_rep_ind1];
+
+		auto socket_ind2 = hash_key2 % 5;
+		auto socket_rep_ind2 = socket_ind2 + 1;
+		if (socket_rep_ind2 > 5) socket_rep_ind2 = 0;
+		auto &socket_ref2 = socket_list[socket_ind2];
+		auto &socket_rep2 = socket_list[socket_rep_ind2];
+
+		auto socket_ind3 = hash_key3 % 5;
+		auto socket_rep_ind3 = socket_ind3 + 1;
+		if (socket_rep_ind3 > 5) socket_rep_ind3 = 0;
+		auto &socket_ref3 = socket_list[socket_ind3];
+		auto &socket_rep3 = socket_list[socket_rep_ind3];
+
 		try {
 			// 20% probability : PUT
-			if(random % 10 < 2) {
+			if(random % 10 < 8) {
 				data = "put("+ key1 + "," + value1 + ")";
-				put_client(*socket_ref);
-				put_client(*socket_rep);
-				// put_client(socket);
+				while(false){
+					size_t x = 0; x=+1;
+					if(x == 2){break;}
+					put_client(*socket_ref1, *socket_rep1, key1, data);
+				}
 			}
 			// 20% probability : M-PUT
 			else if (random % 10 < 4){
-				data = "mput("+ key1 + "," + value1 + "," + key2 + "," + value2 + "," + key3 + "," + value3 +")";
-				mput_client(*socket_ref);
-				mput_client(*socket_rep);
-				//mput_client(socket);
+
+				//For every PUT operation, I have to be at all the 6 sockets, if anyone fails all abort.
+				data = "commit("+ key1 + "," + value1 + ")";
+				data2 = "commit("+ key2 + "," + value2 + ")";
+				data3 = "commit("+ key3 + "," + value3 + ")";
+				while(false){
+					size_t x = 0; x=+1;
+					if(x == 2){break;}
+					mput_client(*socket_ref1, *socket_ref2, *socket_ref3, *socket_rep1, *socket_rep2, *socket_rep3, key1, key2, key3, data, data2, data3);
+				}
 			}
 			// 60% probability : GET
 			else {
 				data = "get("+ key1 + ")";
-				get_client(*socket_ref);
-				get_client(*socket_rep);
-				// get_client(socket);
+				get_client(*socket_ref1, *socket_rep1, data);
 			}
 		} catch (std::exception &e) {
 			std::cerr << e.what() << std::endl;
@@ -301,7 +431,6 @@ int main(int argc, char *argv[]) {
 	}
 
 	// Close the sockets after done.
-	// socket.close();
 	socket1.close();
 	socket2.close();
 	socket3.close();
@@ -313,8 +442,8 @@ int main(int argc, char *argv[]) {
 	std::cout << "******* Performance Measure *******"<< std::endl;
 	std::cout << "PUT Successful (true): " << put_true << std::endl;
 	std::cout << "PUT Failed (false): " << put_false << std::endl;
-	std::cout << "Multi-PUT Successful (true): " << mput_true << std::endl;
-	std::cout << "Multi-PUT Failed (false): " << mput_fail << std::endl;
+	// std::cout << "Multi-PUT Successful (true): " << mput_true << std::endl;
+	// std::cout << "Multi-PUT Failed (false): " << mput_fail << std::endl;
 	std::cout << "GET Successful: " << get_val << std::endl;
 	std::cout << "GET Failed: " << get_null << std::endl;
 	std::cout << "Total Bytes Transmitted: " << sum_bytes << std::endl;

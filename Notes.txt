@@ -1,0 +1,10 @@
+1st Draft:
+    Implement log files for recovery
+    Create a return for the functions put_client and get_client to retry.
+    Repair m-put function.
+    Do multi-threading on client and server.
+
+2nd Draft:
+    Do multi-threading on both client and server side.
+    Need to include log files on the cordinator side as well.
+    Implement the retry condition on fail. (Implemented need to be verified.)

@@ -14,5 +14,5 @@ gcc -std=c++11 \
 -lboost_serialization \
 -lpthread \
 -lstdc++ \
--o server \
-Server.cpp hash.cpp 
+-o threadpool_server \
+threadpool_server.cpp hash.cpp 
