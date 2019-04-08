@@ -1,3 +1,0 @@
-# Replicated-Hash-Table
-
-
