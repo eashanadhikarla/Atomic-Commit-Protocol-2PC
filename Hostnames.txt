@@ -1,5 +1,5 @@
-server1:dyn146102.cc.lehigh.edu
-server2:dyn146102.cc.lehigh.edu
-server3:dyn146102.cc.lehigh.edu
-server4:dyn146102.cc.lehigh.edu
-server5:dyn146102.cc.lehigh.edu
+server1:ec2-13-57-240-141.us-west-1.compute.amazonaws.com
+server2:ec2-52-53-129-234.us-west-1.compute.amazonaws.com
+server3:ec2-54-183-157-221.us-west-1.compute.amazonaws.com
+server4:ec2-13-52-185-71.us-west-1.compute.amazonaws.com
+server5:ec2-13-56-234-0.us-west-1.compute.amazonaws.com
