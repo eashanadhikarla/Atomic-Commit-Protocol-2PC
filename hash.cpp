@@ -190,6 +190,7 @@ string mput_commit(myHash_List mylist, string key, string value) {
 
 //  backup_for_recovery(mylist);
  mtx[hashIdx].unlock();
+ cerr<<"Unlocked"<<endl;
  return retval;
 }
 
