@@ -330,7 +330,7 @@ void worker(std::vector<string> servers_ip){
 		value3 = get_rand();
 		int random = rand(); 
 
-    hash<string> hash_fn;
+    		hash<string> hash_fn;
 		size_t hash_key1 = hash_fn(key1);
 		size_t hash_key2 = hash_fn(key2);
 		size_t hash_key3 = hash_fn(key3);
@@ -367,7 +367,7 @@ void worker(std::vector<string> servers_ip){
 			}
 			// 20% probability : M-PUT
 			else if (random % 10 < 4)
-        {
+        		{
 				//For every PUT operation, I have to be at all the 6 sockets, if anyone fails all abort.
 				data = "commit("+ key1 + "," + value1 + ")";
 				data2 = "commit("+ key2 + "," + value2 + ")";
