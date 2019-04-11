@@ -71,7 +71,7 @@ bool read(tcpsock &socket){
 				flag = 0;
 			}
 			else if(buf_str == "Null"){
-				flag = 1;
+				flag = 1; // Operation is still successful, only the value is not there.
 			}
 		} 
 	}
@@ -162,10 +162,6 @@ bool put_client(tcpsock &socket_ref1, tcpsock &socket_rep1, string key1, string 
 	sum_latency += latency;
 
 	std::cout << std::endl;
-	// If 'successfull commit' then abort and unlock.
-	try_data1 = "a("+key1+")";
-	write(socket_ref1, buffer(try_data1), ignored_error);
-	write(socket_rep1, buffer(try_data1), ignored_error);
 	put_true++;
 	return true;
 }
@@ -205,16 +201,13 @@ bool mput_client(tcpsock &socket_ref1, tcpsock &socket_ref2, tcpsock &socket_ref
 								// Finally all the 5 nodes are locked.
 								// // ************************* Do the commit *****************************
 								write(socket_ref1, buffer(data), ignored_error); 
-								xBytes += data.length();
 								write(socket_ref2, buffer(data2), ignored_error);
-								//xBytes += data2.length();
 								write(socket_ref3, buffer(data3), ignored_error);
-								//xBytes += data3.length();
 								write(socket_rep1, buffer(data), ignored_error);
-								//xBytes += data2.length();
 								write(socket_rep2, buffer(data2), ignored_error);
 								write(socket_rep3, buffer(data3), ignored_error);
 
+								xBytes += data.length();
 								gettimeofday(&start_time_s, nullptr);
 							}
 							else{
@@ -288,16 +281,6 @@ bool mput_client(tcpsock &socket_ref1, tcpsock &socket_ref2, tcpsock &socket_ref
 	sum_latency += latency;
 	std::cout << std::endl;
 
-	// Successfull PUT operation, so send abort to unlock.
-	try_data1 = "a("+key1+")";
-	try_data2 = "a("+key2+")";
-	try_data3 = "a("+key3+")";
-	write(socket_ref1, buffer(try_data1), ignored_error);
-	write(socket_ref2, buffer(try_data2), ignored_error);
-	write(socket_ref3, buffer(try_data3), ignored_error);
-	write(socket_rep1, buffer(try_data1), ignored_error);
-	write(socket_rep2, buffer(try_data2), ignored_error);
-	write(socket_rep3, buffer(try_data3), ignored_error);
 	put_true = put_true+1;
 	return true;
 }
