@@ -38,30 +38,30 @@ private:
 						data_buf += buffer_[i];
 					}
 					// PUT
-					if (data_buf[0] == 'p'){
-						int index = data_buf.find(",");
+// 					if (data_buf[0] == 'p'){
+// 						int index = data_buf.find(",");
 
-						for(int i=4; i<index; i++){
-							str_key += buffer_[i];
-						}
+// 						for(int i=4; i<index; i++){
+// 							str_key += buffer_[i];
+// 						}
 						
-						for(int i=index+1; i<length-1; i++){
-							value += buffer_[i];
-						}
-						// Saving PUT in hash message for hashing.
-						ht_message = put(mylist, str_key, value);
+// 						for(int i=index+1; i<length-1; i++){
+// 							value += buffer_[i];
+// 						}
+// 						// Saving PUT in hash message for hashing.
+// 						ht_message = mput_commit(mylist, str_key, value);
 
-						if(ht_message.length()>length){
-						    	length = ht_message.length();
-						}
-						for (int i = 0; i < length; ++i){
-						    	buffer_[i] = ht_message[i];
-						}
-						cout << endl;
-					}
+// 						if(ht_message.length()>length){
+// 						    	length = ht_message.length();
+// 						}
+// 						for (int i = 0; i < length; ++i){
+// 						    	buffer_[i] = ht_message[i];
+// 						}
+// 						cout << endl;
+// 					}
 
 					// Try Locking
-					else if(data_buf[0] == 't'){
+					if(data_buf[0] == 't'){
 						for(int i=2; i<length-1; i++){
 							str_key += buffer_[i];
 						}
