@@ -31,17 +31,17 @@ myHash_List init_hashlist(void){
 // void backup_for_recovery(myHash_List mylist){
 //   u32 i;
 //   myNode p; 
-//   cout << "Writing into the log:" << endl; 
+//   cerr << "Writing into the log:" << endl; 
 //   for( i = 0;i < HASH_NUM_MAX;i++){
 //     p = mylist->list[i]->next;
 //     while( NULL != p ){
 //       // We need to have the cordinator name in future after every operation.
 //       // We need to know where we are in the current phase.
-//       cout << "ID = " << p->id << " key = " << p->key << " Value = " << p->value << endl;
+//       cerr << "ID = " << p->id << " key = " << p->key << " Value = " << p->value << endl;
 //       p = p->next;
 //     }        
 //   }
-//   cout << endl;
+//   cerr << endl;
 //   ofstream out("hash.log", ios::app);
 //   if (out.is_open()){
 //     out << mylist << endl;
@@ -58,7 +58,7 @@ string put(myHash_List mylist,string key,string value){
 
  // **********************************LOCK**********************************
  mtx[hashIdx].lock();
- cout << "Locked" << endl;
+ cerr << "Locked" << endl;
 
  p_end = (Node *)malloc(sizeof(Node));
  p_end->next = NULL;
@@ -68,7 +68,7 @@ string put(myHash_List mylist,string key,string value){
  //nonexistent key-value in the row
  if( NULL == mylist->list[hashIdx]->next ){
   mylist->list[hashIdx]->next = p_end;   
-  cout << "Commit Successful" << endl;
+  cerr << "Commit Successful" << endl;
   retval = "true";
 
  }
@@ -79,19 +79,19 @@ string put(myHash_List mylist,string key,string value){
    q = q->next; 
    //the key is exsit
    if(key == p->key ){
-     cout<<"Commit Failed"<<endl;
+     cerr<<"Commit Failed"<<endl;
     retval = "fals";
     mtx[hashIdx].unlock();
    }  
  }
  p->next = p_end;
- cout<<"Commit Successful"<<endl;
+ cerr<<"Commit Successful"<<endl;
 
 //  backup_for_recovery(mylist);
 
  // *********************************UNLOCK**********************************
  mtx[hashIdx].unlock();
- cout << "Unlocked" << endl;
+ cerr << "Unlocked" << endl;
 
  return retval;
 }
@@ -107,19 +107,19 @@ string get(myHash_List mylist,string key){
  p = mylist->list[hashIdx]->next; 
    //whether the hashlist is empty
  if( NULL == p ){
-   cout<<"GET Failed"<<endl; 
+   cerr<<"GET Failed"<<endl; 
    return "Null"; 
  }
    //whether the first node is the key(searched)
  if(key == p->key){
    string p_val;
    p_val = p->value;
-   cout<<"GET Successful"<<endl; 
+   cerr<<"GET Successful"<<endl; 
    return p_val; 
  }
    //whether second node is empty
  if( NULL == p->next ){
-   cout<<"GET Failed"<<endl; 
+   cerr<<"GET Failed"<<endl; 
    return "Null";    
  } 
    //whether the node is the key(searched)
@@ -127,14 +127,14 @@ string get(myHash_List mylist,string key){
    p = p->next;
        //whether the node is empty
    if( NULL == p->next ){
-     cout<<"GET Failed"<<endl; 
+     cerr<<"GET Failed"<<endl; 
      return "Null";    
    }       
  } 
  string p_val2;
  p_val2 = p->value;
    //delete successfully
- cout<<"GET Successful"<<endl; 
+ cerr<<"GET Successful"<<endl; 
  return p_val2;  
 }
 
@@ -152,7 +152,7 @@ string mput_try(myHash_List mylist,string key){
     return "fals";
   }
   return "lock";
-  cout << "Locked" << endl;
+  cerr << "Locked" << endl;
 }
 
 string mput_commit(myHash_List mylist, string key, string value) {
@@ -170,7 +170,7 @@ string mput_commit(myHash_List mylist, string key, string value) {
  //nonexistent key-value in the row
  if( NULL == mylist->list[hashIdx]->next ){
   mylist->list[hashIdx]->next = p_end;   
-  cout << "Commit Successful" << endl;
+  cerr << "Commit Successful" << endl;
   retval = "true";
  }
  //existent key-value in the row
@@ -180,13 +180,13 @@ string mput_commit(myHash_List mylist, string key, string value) {
    q = q->next; 
    //the key is exsit
    if(key == p->key ){
-     cout<<"Commit Failed"<<endl;
+     cerr<<"Commit Failed"<<endl;
     retval = "fals";
     mtx[hashIdx].unlock();
    }  
  }
  p->next = p_end;
- cout<<"Commit Successful"<<endl;
+ cerr<<"Commit Successful"<<endl;
 
 //  backup_for_recovery(mylist);
  mtx[hashIdx].unlock();
@@ -200,5 +200,5 @@ string mput_abort(myHash_List mylist, string key) {
   unsigned int hashIdx = hash_key % 10000;
   mtx[hashIdx].unlock();
   return "";
-  cout << "Unlocked" << endl;
+  cerr << "Unlocked" << endl;
  }
