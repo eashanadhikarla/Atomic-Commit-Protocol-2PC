@@ -4,14 +4,16 @@ gcc -std=c++11 \
 -lboost_regex \
 -lboost_serialization \
 -lpthread \
+-g \
 -lstdc++ \
--o client \
-Client.cpp \
+-o ex_client \
+ex_lient.cpp \
 
 gcc -std=c++11 \
 -lboost_system \
 -lboost_regex \
 -lboost_serialization \
+-g \
 -lpthread \
 -lstdc++ \
 -o threadpool_server \

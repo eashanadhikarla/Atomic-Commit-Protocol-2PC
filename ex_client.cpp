@@ -53,7 +53,7 @@ bool read(tcpsock &socket){
 		// Recieve and read reply from the Server.
 		boost::system::error_code ignored_error; 
 		size_t len = socket.read_some(boost::asio::buffer(buf), ignored_error);
-		std::cout << "Read from the server." << len << std::endl;
+		std::cout << "Read back from the server." << len << std::endl;
 		if (len > 0) {
 			recd += len;
 			buf[len] = 0;
@@ -72,7 +72,6 @@ bool read(tcpsock &socket){
 			}
 			else if(buf_str == "Null"){
 				flag = 1;
-				get_val++;
 			}
 		} 
 	}
@@ -93,6 +92,7 @@ void get_client(tcpsock &socket_ref1, tcpsock &socket_rep1, string data) {
 
 	bool flag = read(socket_ref1);
 	cout << "GET Successful";
+	get_val++;
 
 	gettimeofday(&end_time_s, nullptr);
 	std::cout << std::endl;
@@ -122,18 +122,18 @@ bool put_client(tcpsock &socket_ref1, tcpsock &socket_rep1, string key1, string 
 	// Write data to the Socket and send it to the Server.
 	// Prepare Phase | Phase 1
 	write(socket_ref1, buffer(try_data1), ignored_error);
-	std::cout << "Prepared Socket REF " << socket_ref1.native_handle() << std::endl;
+	std::cout << "Prepared Socket Reference" << socket_ref1.native_handle() << std::endl;
 	bool flag = read(socket_ref1);
 	if(flag == 1){
 		write(socket_rep1, buffer(try_data1), ignored_error);
-		std::cout << "Prepared Socket REP " << socket_rep1.native_handle() << std::endl;
+		std::cout << "Prepared Socket Replication" << socket_rep1.native_handle() << std::endl;
 		flag = read(socket_rep1);
 		if(flag == 1){
 			// Commit Phase | Phase 2
 			write(socket_ref1, buffer(data), ignored_error);
-			std::cout << "Commit REF" << socket_ref1.native_handle() << std::endl;
+			std::cout << "Commit Reference" << socket_ref1.native_handle() << std::endl;
 			write(socket_rep1, buffer(data), ignored_error);
-			std::cout << "Prepared REP" << socket_rep1.native_handle() << std::endl;
+			std::cout << "Commit Replication" << socket_rep1.native_handle() << std::endl;
 			xBytes += data.length();
 			gettimeofday(&start_time_s, nullptr);
 		}
@@ -358,16 +358,16 @@ void worker(std::vector<string> servers_ip){
 			// 20% probability : PUT
 			if(random % 10 < 9) {
 				data = "commit("+ key1 + "," + value1 + ")";
-				// while(false){
-				// 	size_t x = 0; x=+1;
-				// 	if(x == 2){break;}
-				// 	put_client(*socket_ref1, *socket_rep1, key1, data);
-				// }
 				put_client(*socket_ref1, *socket_rep1, key1, data);
+				while(false){
+					size_t x = 0; x=+1;
+					if(x == 2){break;}
+					put_client(*socket_ref1, *socket_rep1, key1, data);
+				}
 			}
 			// 20% probability : M-PUT
 			else if (random % 10 < 4)
-            {
+        {
 				//For every PUT operation, I have to be at all the 6 sockets, if anyone fails all abort.
 				data = "commit("+ key1 + "," + value1 + ")";
 				data2 = "commit("+ key2 + "," + value2 + ")";
