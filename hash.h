@@ -20,7 +20,7 @@ typedef struct _Hash_List{
 }Hash_List,*myHash_List;
 
 myHash_List init_hashlist(void);
-string put(myHash_List mylist,string key,string value);
+//string put(myHash_List mylist,string key,string value);
 string get(myHash_List mylist,string key);
 string mput_try(myHash_List mylist,string key);
 string mput_commit(myHash_List mylist, string key, string value);
