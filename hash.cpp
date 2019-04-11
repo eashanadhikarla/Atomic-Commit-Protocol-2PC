@@ -13,6 +13,7 @@ std::vector<mutex> mtx(10000);
 Node *p,*q,*p_end;
 string retval;
 hash<string> hash_fn;
+unsigned int hashIdx;
 
 // Initialize the Hash List
 myHash_List init_hashlist(void){
@@ -49,52 +50,52 @@ myHash_List init_hashlist(void){
 //   }
 // }
 
-// PUT function
-string put(myHash_List mylist,string key,string value){
+// // PUT function
+// string put(myHash_List mylist,string key,string value){
  
- //hash<string> hash_fn;
- size_t hash_key = hash_fn(key);
- unsigned int hashIdx = hash_key % 10000; 
+//  //hash<string> hash_fn;
+//  size_t hash_key = hash_fn(key);
+//  unsigned int hashIdx = hash_key % 10000; 
 
- // **********************************LOCK**********************************
- mtx[hashIdx].lock();
- cerr << "Locked" << endl;
+//  // **********************************LOCK**********************************
+//  mtx[hashIdx].lock();
+//  cerr << "Locked" << endl;
 
- p_end = (Node *)malloc(sizeof(Node));
- p_end->next = NULL;
- p_end->value = value;
- p_end->key = key;
+//  p_end = (Node *)malloc(sizeof(Node));
+//  p_end->next = NULL;
+//  p_end->value = value;
+//  p_end->key = key;
 
- //nonexistent key-value in the row
- if( NULL == mylist->list[hashIdx]->next ){
-  mylist->list[hashIdx]->next = p_end;   
-  cerr << "Commit Successful" << endl;
-  retval = "true";
+//  //nonexistent key-value in the row
+//  if( NULL == mylist->list[hashIdx]->next ){
+//   mylist->list[hashIdx]->next = p_end;   
+//   cerr << "Commit Successful" << endl;
+//   retval = "true";
 
- }
- //existent key-value in the row
- q = mylist->list[hashIdx]->next;
- while( q ){
-   p = q;
-   q = q->next; 
-   //the key is exsit
-   if(key == p->key ){
-     cerr<<"Commit Failed"<<endl;
-    retval = "fals";
-    mtx[hashIdx].unlock();
-   }  
- }
- p->next = p_end;
- cerr<<"Commit Successful"<<endl;
+//  }
+//  //existent key-value in the row
+//  q = mylist->list[hashIdx]->next;
+//  while( q ){
+//    p = q;
+//    q = q->next; 
+//    //the key is exsit
+//    if(key == p->key ){
+//      cerr<<"Commit Failed"<<endl;
+//     retval = "fals";
+//     mtx[hashIdx].unlock();
+//    }  
+//  }
+//  p->next = p_end;
+//  cerr<<"Commit Successful"<<endl;
 
-//  backup_for_recovery(mylist);
+// //  backup_for_recovery(mylist);
 
- // *********************************UNLOCK**********************************
- mtx[hashIdx].unlock();
- cerr << "Unlocked" << endl;
+//  // *********************************UNLOCK**********************************
+//  mtx[hashIdx].unlock();
+//  cerr << "Unlocked" << endl;
 
- return retval;
-}
+//  return retval;
+// }
 
 // GET function
 string get(myHash_List mylist,string key){
@@ -143,10 +144,9 @@ string mput_try(myHash_List mylist,string key){
   //missing condition for two put at the same time try lock, then one of them will lock 
   //and the other will get error in try_lock.
   //hash<string> hash_fn;
-  size_t hash_key; 
- 
-  hash_key = hash_fn(key);
-  unsigned int hashIdx = hash_key % 10000;
+
+  size_t hash_key = hash_fn(key);
+  hashIdx = hash_key % 10000;
   //try lock
   if(mtx[hashIdx].try_lock() == false){
     return "fals";
@@ -159,8 +159,9 @@ string mput_commit(myHash_List mylist, string key, string value) {
  // Actually put the thing; same as put(), but it doesn't need to lock the bucket,
  // because we know it's already locked by mput_try
  //hash<string> hash_fn;
- size_t hash_key = hash_fn(key);
- unsigned int hashIdx = hash_key % 10000;
+
+ //  size_t hash_key = hash_fn(key);
+ //  unsigned int hashIdx = hash_key % 10000;
  
  p_end = (Node *)malloc(sizeof(Node));
  p_end->next = NULL;
@@ -197,8 +198,10 @@ string mput_commit(myHash_List mylist, string key, string value) {
 string mput_abort(myHash_List mylist, string key) {
   // Don't put k/v, just unlock the bucket.
   //hash<string> hash_fn;
-  size_t hash_key = hash_fn(key);
-  unsigned int hashIdx = hash_key % 10000;
+  
+  // size_t hash_key = hash_fn(key);
+  // unsigned int hashIdx = hash_key % 10000;
+  
   mtx[hashIdx].unlock();
   return "";
   cerr << "Unlocked" << endl;
