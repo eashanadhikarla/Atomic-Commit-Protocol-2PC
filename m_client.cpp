@@ -53,7 +53,7 @@ bool read(tcpsock &socket){
 		// Recieve and read reply from the Server.
 		boost::system::error_code ignored_error; 
 		size_t len = socket.read_some(boost::asio::buffer(buf), ignored_error);
-		std::cout << "Read back from the server." << len << std::endl;
+		std::cout << "Read back from the server" << len << std::endl;
 		if (len > 0) {
 			recd += len;
 			buf[len] = 0;
@@ -134,12 +134,15 @@ bool put_client(tcpsock &socket_ref1, tcpsock &socket_rep1, string key1, string 
 			std::cout << "Commit Reference" << socket_ref1.native_handle() << std::endl;
 			write(socket_rep1, buffer(data), ignored_error);
 			std::cout << "Commit Replication" << socket_rep1.native_handle() << std::endl;
+			read(socket_ref1);
+			read(socket_rep1);
 			xBytes += data.length();
 			gettimeofday(&start_time_s, nullptr);
 		}
 		else{
 			try_data1 = "a("+key1+")";
 			write(socket_ref1, buffer(try_data1), ignored_error);
+			read(socket_ref1);
 			usleep(sleepTime);
 			return false;// retry
 		}
