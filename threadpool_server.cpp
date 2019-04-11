@@ -170,7 +170,7 @@ private:
 };
 
 int main(int argc, char* argv[]){
-    AsioThreadPool pool(8);
+    AsioThreadPool pool(1);
 	unsigned short port = 9000;
 
     // boost::asio::io_context io_service;
