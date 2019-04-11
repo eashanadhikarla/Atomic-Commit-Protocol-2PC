@@ -7,7 +7,7 @@ gcc -std=c++11 \
 -g \
 -lstdc++ \
 -o ex_client \
-ex_lient.cpp \
+ex_client.cpp \
 
 gcc -std=c++11 \
 -lboost_system \
