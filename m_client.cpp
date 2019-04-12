@@ -53,7 +53,7 @@ bool read(tcpsock &socket){
 		// Recieve and read reply from the Server.
 		boost::system::error_code ignored_error; 
 		size_t len = socket.read_some(boost::asio::buffer(buf), ignored_error);
-		std::cout << "Read back from the server" << len << std::endl;
+		std::cout << "Buffer Length from received from Server: " << len << std::endl;
 		if (len > 0) {
 			recd += len;
 			buf[len] = 0;
@@ -125,18 +125,18 @@ bool put_client(tcpsock &socket_ref1, tcpsock &socket_rep1, string key1, string 
 	// Write data to the Socket and send it to the Server.
 	// Prepare Phase | Phase 1
 	write(socket_ref1, buffer(try_data1), ignored_error);
-	std::cout << "Prepared Socket Reference" << socket_ref1.native_handle() << std::endl;
+	std::cout << "Prepared Socket Reference : " << socket_ref1.native_handle() << std::endl;
 	bool flag = read(socket_ref1);
 	if(flag == 1){
 		write(socket_rep1, buffer(try_data1), ignored_error);
-		std::cout << "Prepared Socket Replication" << socket_rep1.native_handle() << std::endl;
+		std::cout << "Prepared Socket Replication : " << socket_rep1.native_handle() << std::endl;
 		flag = read(socket_rep1);
 		if(flag == 1){
 			// Commit Phase | Phase 2
 			write(socket_ref1, buffer(data), ignored_error);
-			std::cout << "Commit Reference" << socket_ref1.native_handle() << std::endl;
+			std::cout << "Commit Reference : " << socket_ref1.native_handle() << std::endl;
 			write(socket_rep1, buffer(data), ignored_error);
-			std::cout << "Commit Replication" << socket_rep1.native_handle() << std::endl;
+			std::cout << "Commit Replication : " << socket_rep1.native_handle() << std::endl;
 			read(socket_ref1);
 			read(socket_rep1);
 			xBytes += data.length();
