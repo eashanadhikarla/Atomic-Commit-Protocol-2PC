@@ -47,13 +47,13 @@ bool read(tcpsock &socket){
 	bool flag;
 	flag = 1;
 	while (recd < 4) {
-		char buf[256];
-		memset(buf, 0, 256); // Empty the buffer evereytime.
+		char buf[512];
+		memset(buf, 0, 512); // Empty the buffer evereytime.
 		string buf_str;
 		// Recieve and read reply from the Server.
 		boost::system::error_code ignored_error; 
 		size_t len = socket.read_some(boost::asio::buffer(buf), ignored_error);
-		std::cout << "Buffer Length from received from Server: " << len << std::endl;
+		std::cout << "Buffer length received from Server: " << len << std::endl;
 		if (len > 0) {
 			recd += len;
 			buf[len] = 0;
