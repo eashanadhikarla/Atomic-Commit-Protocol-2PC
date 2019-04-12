@@ -30,78 +30,30 @@ myHash_List init_hashlist(void){
   return mylist;
 } 
 
-// void backup_for_recovery(myHash_List mylist){
-//   u32 i;
-//   myNode p; 
-//   cerr << "Writing into the log:" << endl; 
-//   for( i = 0;i < HASH_NUM_MAX;i++){
-//     p = mylist->list[i]->next;
-//     while( NULL != p ){
-//       // We need to have the cordinator name in future after every operation.
-//       // We need to know where we are in the current phase.
-//       cerr << "ID = " << p->id << " key = " << p->key << " Value = " << p->value << endl;
-//       p = p->next;
-//     }        
-//   }
-//   cerr << endl;
-//   ofstream out("hash.log", ios::app);
-//   if (out.is_open()){
-//     out << mylist << endl;
-//     out.close();
-//   }
-// }
+void backup_for_recovery(myHash_List mylist){
+  u32 i;
+  myNode p; 
+  cerr << "Writing into the log:" << endl; 
+  for( i = 0;i < HASH_NUM_MAX;i++){
+    p = mylist->list[i]->next;
+    while( NULL != p ){
+      // We need to have the cordinator name in future after every operation.
+      // We need to know where we are in the current phase.
+      cerr << "ID = " << p->id << " key = " << p->key << " Value = " << p->value << endl;
+      p = p->next;
+    }        
+  }
+  cerr << endl;
+  ofstream out("hash.log", ios::app);
+  if (out.is_open()){
+    out << mylist << endl;
+    out.close();
+  }
+}
 
-// // PUT function
-// string put(myHash_List mylist,string key,string value){
- 
-//  //hash<string> hash_fn;
-//  size_t hash_key = hash_fn(key);
-//  unsigned int hashIdx = hash_key % 10000; 
-
-//  // **********************************LOCK**********************************
-//  mtx[hashIdx].lock();
-//  cerr << "Locked" << endl;
-
-//  p_end = (Node *)malloc(sizeof(Node));
-//  p_end->next = NULL;
-//  p_end->value = value;
-//  p_end->key = key;
-
-//  //nonexistent key-value in the row
-//  if( NULL == mylist->list[hashIdx]->next ){
-//   mylist->list[hashIdx]->next = p_end;   
-//   cerr << "Commit Successful" << endl;
-//   retval = "true";
-
-//  }
-//  //existent key-value in the row
-//  q = mylist->list[hashIdx]->next;
-//  while( q ){
-//    p = q;
-//    q = q->next; 
-//    //the key is exsit
-//    if(key == p->key ){
-//      cerr<<"Commit Failed"<<endl;
-//     retval = "fals";
-//     mtx[hashIdx].unlock();
-//    }  
-//  }
-//  p->next = p_end;
-//  cerr<<"Commit Successful"<<endl;
-
-// //  backup_for_recovery(mylist);
-
-//  // *********************************UNLOCK**********************************
-//  mtx[hashIdx].unlock();
-//  cerr << "Unlocked" << endl;
-
-//  return retval;
-// }
-
-// GET function
+// GET will return the respective value.
 string get(myHash_List mylist,string key){
 
- //hash<string> hash_fn;
  size_t hash_key = hash_fn(key);
  unsigned int hashIdx = hash_key % 10000;
 
@@ -135,16 +87,15 @@ string get(myHash_List mylist,string key){
  } 
  string p_val2;
  p_val2 = p->value;
-   //delete successfully
+ //delete successfully
  cerr<<"GET Successful"<<endl; 
  return p_val2;  
 }
 
-// Multiple-PUT Try locking
+// Will check if the bucket is available and lock it.
 string mput_try(myHash_List mylist,string key){
   //missing condition for two put at the same time try lock, then one of them will lock 
   //and the other will get error in try_lock.
-  //hash<string> hash_fn;
 
   size_t hash_key = hash_fn(key);
   hashIdx = hash_key % 10000;
@@ -156,10 +107,11 @@ string mput_try(myHash_List mylist,string key){
   cerr << "Locked" << endl;
 }
 
+// Commit Phase | Phase 2 will actually commit the operation. 
 string mput_commit(myHash_List mylist, string key, string value) {
  // Actually put the thing; same as put(), but it doesn't need to lock the bucket,
  // because we know it's already locked by mput_try
- //hash<string> hash_fn;
+
  cerr << "Inside Commit Function" << endl;
  size_t hash_key = hash_fn(key);
  unsigned int hashIdx = hash_key % 10000;
@@ -173,14 +125,14 @@ string mput_commit(myHash_List mylist, string key, string value) {
  p_end->key = key;
 
  //nonexistent key-value in the row
- cerr << "bouta access" << endl;
+ cerr << "About to Access" << endl;
  if( NULL == mylist->list[hashIdx]->next ){
-   cerr << "accessed 1" << endl;
+   cerr << "Accessed 1" << endl;
   mylist->list[hashIdx]->next = p_end;   
   cerr << "Commit Successful" << endl;
   retval = "true";
  }
- cerr << "accessed 2" << endl;
+ cerr << "Accessed 2" << endl;
  //existent key-value in the row
  q = mylist->list[hashIdx]->next;
  while(q){
@@ -188,26 +140,25 @@ string mput_commit(myHash_List mylist, string key, string value) {
    q = q->next; 
    //the key is exsit
    if(key == p->key ){
-     cerr<<"Commit Failed"<<endl;
+    cerr<<"Commit Failed"<<endl;
     retval = "fals";
     mtx[hashIdx].unlock();
    }  
  }
  p->next = p_end;
  cerr<<"Commit Successful"<<endl;
- //  backup_for_recovery(mylist);
+ backup_for_recovery(mylist);
  mtx[hashIdx].unlock();
  cerr << "Unlocked" << endl;
-
  return retval;
 }
 
+// Abort will unlock the respective bucket.
 string mput_abort(myHash_List mylist, string key) {
   // Don't put k/v, just unlock the bucket.
-  //hash<string> hash_fn;
   
-  // size_t hash_key = hash_fn(key);
-  // unsigned int hashIdx = hash_key % 10000;
+  size_t hash_key = hash_fn(key);
+  unsigned int hashIdx = hash_key % 10000;
   
   mtx[hashIdx].unlock();
   return "true";
