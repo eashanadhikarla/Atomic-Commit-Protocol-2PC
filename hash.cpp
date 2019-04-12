@@ -159,23 +159,25 @@ string mput_commit(myHash_List mylist, string key, string value) {
  // Actually put the thing; same as put(), but it doesn't need to lock the bucket,
  // because we know it's already locked by mput_try
  //hash<string> hash_fn;
-
  cerr << "Inside Commit Function" << endl;
  size_t hash_key = hash_fn(key);
  unsigned int hashIdx = hash_key % 10000;
  cerr << "Locked HashIdx Found" << endl;
- 
+
  p_end = (Node *)malloc(sizeof(Node));
  p_end->next = NULL;
  p_end->value = value;
  p_end->key = key;
 
  //nonexistent key-value in the row
+ cerr << "bouta access" << endl;
  if( NULL == mylist->list[hashIdx]->next ){
+   cerr << "accessed 1" << endl;
   mylist->list[hashIdx]->next = p_end;   
   cerr << "Commit Successful" << endl;
   retval = "true";
  }
+ cerr << "accessed 2" << endl;
  //existent key-value in the row
  q = mylist->list[hashIdx]->next;
  while(q){
@@ -205,6 +207,6 @@ string mput_abort(myHash_List mylist, string key) {
   // unsigned int hashIdx = hash_key % 10000;
   
   mtx[hashIdx].unlock();
-  return "";
+  return "true";
   cerr << "Unlocked" << endl;
  }
