@@ -342,7 +342,7 @@ void worker(std::vector<string> servers_ip){
 
 		try {
 			// 20% probability : PUT
-			if(random % 10 < 9) {
+			if(random % 10 < 2) {
 				data = "commit("+ key1 + "," + value1 + ")";
 				put_client(*socket_ref1, *socket_rep1, key1, data);
 				while(false){
@@ -358,6 +358,7 @@ void worker(std::vector<string> servers_ip){
 				data = "commit("+ key1 + "," + value1 + ")";
 				data2 = "commit("+ key2 + "," + value2 + ")";
 				data3 = "commit("+ key3 + "," + value3 + ")";
+// 				mput_client(*socket_ref1, *socket_ref2, *socket_ref3, *socket_rep1, *socket_rep2, *socket_rep3, key1, key2, key3, data, data2, data3);
 				while(false){
 					size_t x = 0; x=+1;
 					if(x == 2){break;}
