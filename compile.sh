@@ -6,8 +6,8 @@ gcc -std=c++11 \
 -lpthread \
 -g \
 -lstdc++ \
--o m_client \
-m_client.cpp \
+-o client_cordinator \
+client_cordinator.cpp \
 
 gcc -std=c++11 \
 -lboost_system \
