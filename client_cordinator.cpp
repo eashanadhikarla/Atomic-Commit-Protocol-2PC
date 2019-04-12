@@ -62,7 +62,7 @@ bool read(tcpsock &socket){
 			for(int i=0;i<4;++i){
 				buf_str += buf[i];
 			}
-			std::cout << "Buf_str " << buf_str <<std::endl;
+			// std::cout << "Buf_str " << buf_str <<std::endl;
 			// Counting the Results for performance measure.
 			if(buf_str == "lock"){
 				flag = 1;
@@ -76,6 +76,7 @@ bool read(tcpsock &socket){
 			else if(buf_str == "true"){
 				flag = 1;
 			}
+			buf_str = "";
 		} 
 	}
 	return flag;
@@ -206,12 +207,18 @@ bool mput_client(tcpsock &socket_ref1, tcpsock &socket_ref2, tcpsock &socket_ref
 							if(flag == 1){
 								// Finally all the 5 nodes are locked.
 								// // ************************* Do the commit *****************************
-								write(socket_ref1, buffer(data), ignored_error); 
+								write(socket_ref1, buffer(data), ignored_error);
+								read(socket_ref1); 
 								write(socket_ref2, buffer(data2), ignored_error);
+								read(socket_ref2);
 								write(socket_ref3, buffer(data3), ignored_error);
+								read(socket_ref3);
 								write(socket_rep1, buffer(data), ignored_error);
+								read(socket_rep1);
 								write(socket_rep2, buffer(data2), ignored_error);
+								read(socket_rep2);
 								write(socket_rep3, buffer(data3), ignored_error);
+								read(socket_rep3);
 
 								xBytes += data.length();
 								gettimeofday(&start_time_s, nullptr);
@@ -222,10 +229,15 @@ bool mput_client(tcpsock &socket_ref1, tcpsock &socket_ref2, tcpsock &socket_ref
 								try_data3 = "a("+key3+")";
 								// Unlocking
 								write(socket_ref1, buffer(try_data1), ignored_error);
+								read(socket_ref1);
 								write(socket_ref2, buffer(try_data2), ignored_error);
+								read(socket_ref2);
 								write(socket_ref3, buffer(try_data3), ignored_error);
+								read(socket_ref3);
 								write(socket_rep1, buffer(try_data1), ignored_error);
+								read(socket_rep1);
 								write(socket_rep2, buffer(try_data2), ignored_error);
+								read(socket_rep2);
 								usleep(sleepTime);
 								return false;// retry
 							}
@@ -235,9 +247,13 @@ bool mput_client(tcpsock &socket_ref1, tcpsock &socket_ref2, tcpsock &socket_ref
 							try_data2 = "a("+key2+")";
 							try_data3 = "a("+key3+")";
 							write(socket_ref1, buffer(try_data1), ignored_error);
+							read(socket_ref1);
 							write(socket_ref2, buffer(try_data2), ignored_error);
+							read(socket_ref2);
 							write(socket_ref3, buffer(try_data3), ignored_error);
+							read(socket_ref3);
 							write(socket_rep1, buffer(try_data1), ignored_error);
+							read(socket_rep1);
 							usleep(sleepTime);
 							return false;// retry
 						}
@@ -247,8 +263,11 @@ bool mput_client(tcpsock &socket_ref1, tcpsock &socket_ref2, tcpsock &socket_ref
 						try_data2 = "a("+key2+")";
 						try_data3 = "a("+key3+")";
 						write(socket_ref1, buffer(try_data1), ignored_error);
+						read(socket_ref1);
 						write(socket_ref2, buffer(try_data2), ignored_error);
+						read(socket_ref2);
 						write(socket_ref3, buffer(try_data3), ignored_error);
+						read(socket_ref3);
 						usleep(sleepTime);
 						return false;// retry
 					}
@@ -257,7 +276,9 @@ bool mput_client(tcpsock &socket_ref1, tcpsock &socket_ref2, tcpsock &socket_ref
 				try_data1 = "a("+key1+")";
 				try_data2 = "a("+key2+")";
 				write(socket_ref1, buffer(try_data1), ignored_error);
+				read(socket_ref1);
 				write(socket_ref2, buffer(try_data2), ignored_error);
+				read(socket_ref2);
 				usleep(sleepTime);
 				return false;// retry
 			}
@@ -265,6 +286,7 @@ bool mput_client(tcpsock &socket_ref1, tcpsock &socket_ref2, tcpsock &socket_ref
 		else{
 			try_data1 = "a("+key1+")";
 			write(socket_ref1, buffer(try_data1), ignored_error);
+			read(socket_ref1);
 			usleep(sleepTime);
 			return false;// retry
 		}
@@ -287,7 +309,7 @@ bool mput_client(tcpsock &socket_ref1, tcpsock &socket_ref2, tcpsock &socket_ref
 	sum_latency += latency;
 	std::cout << std::endl;
 
-	put_true = put_true+1;
+	put_true = put_true+6;
 	return true;
 }
 
@@ -403,11 +425,11 @@ int main(int argc, char *argv[]) {
 	}
 	file.close();
 
-	static const int MAX_THREAD = 1;
+	static const int MAX_THREAD = 8; // Number of threads 
 	std::thread t[MAX_THREAD];
 	for(int i=0; i<MAX_THREAD; ++i){
 		t[i] = std::thread(worker,servers_ip);
-		cout << "Final Thread " << i << endl;
+		cout << "Final Thread " << i << endl; // Checkpoint
 	} 
 
 	for(int i=0; i<MAX_THREAD; ++i){
