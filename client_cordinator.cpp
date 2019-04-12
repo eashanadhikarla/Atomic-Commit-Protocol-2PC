@@ -26,7 +26,7 @@ long int sleepTime = 10000L+(long)((1e5-1e4)*rand()/(RAND_MAX+1.0));
 /* Auto-generation of Operations. */
 string get_rand(){
 	int key_range = 10000;
-	int random = rand();
+	int random = rand()%10;
 	int key = random % key_range;
 	string key_str = to_string(key);
   return key_str;
@@ -367,7 +367,7 @@ void worker(std::vector<string> servers_ip){
 
 	try {
 		// 20% probability : PUT
-		if(random % 10 < 9) {
+		if(random % 10 < 1) {
 			data = "commit("+ key1 + "," + value1 + ")";
 			put_client(*socket_ref1, *socket_rep1, key1, data);
 			while(false){
