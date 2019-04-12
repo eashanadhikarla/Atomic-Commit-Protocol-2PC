@@ -10,6 +10,7 @@
 using namespace std;
 
 std::vector<mutex> mtx(10000);
+//Node* p, q, p_end;
 Node *p,*q,*p_end;
 string retval;
 hash<string> hash_fn;
@@ -164,7 +165,9 @@ string mput_commit(myHash_List mylist, string key, string value) {
  unsigned int hashIdx = hash_key % 10000;
  cerr << "Locked HashIdx Found" << endl;
 
- p_end = (Node *)malloc(sizeof(Node));
+ p_end = new Node();
+ cerr << "address of p_end: " << (int)p_end << endl;
+ //p_end = (Node *)malloc(sizeof(Node));
  p_end->next = NULL;
  p_end->value = value;
  p_end->key = key;
