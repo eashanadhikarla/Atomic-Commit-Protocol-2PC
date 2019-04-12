@@ -166,7 +166,7 @@ string mput_commit(myHash_List mylist, string key, string value) {
  cerr << "Locked HashIdx Found" << endl;
 
  p_end = new Node();
- cerr << "address of p_end: " << (int)p_end << endl;
+ //cerr << "address of p_end: " << (int)p_end << endl;
  //p_end = (Node *)malloc(sizeof(Node));
  p_end->next = NULL;
  p_end->value = value;
