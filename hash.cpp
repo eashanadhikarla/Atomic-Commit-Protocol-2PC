@@ -160,8 +160,10 @@ string mput_commit(myHash_List mylist, string key, string value) {
  // because we know it's already locked by mput_try
  //hash<string> hash_fn;
 
- //  size_t hash_key = hash_fn(key);
- //  unsigned int hashIdx = hash_key % 10000;
+ cerr << "Inside Commit Function" << endl;
+ size_t hash_key = hash_fn(key);
+ unsigned int hashIdx = hash_key % 10000;
+ cerr << "Locked HashIdx Found" << endl;
  
  p_end = (Node *)malloc(sizeof(Node));
  p_end->next = NULL;
