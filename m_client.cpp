@@ -73,6 +73,9 @@ bool read(tcpsock &socket){
 			else if(buf_str == "Null"){
 				flag = 1; // Operation is still successful, only the value is not there.
 			}
+			else if(buf_str == "true"){
+				flag = 1;
+			}
 		} 
 	}
 	return flag;
@@ -305,74 +308,74 @@ void worker(std::vector<string> servers_ip){
 	socket_list.push_back(&socket3);
 	socket_list.push_back(&socket4);
 	socket_list.push_back(&socket5);
-		for (int i = 0; i < 10000; i++){
-		key1 = get_rand();
-		value1 = get_rand();
+	for (int i = 0; i < 10000; i++){
+	key1 = get_rand();
+	value1 = get_rand();
 
-		key2 = get_rand();
-		value2 = get_rand();
+	key2 = get_rand();
+	value2 = get_rand();
 
-		key3 = get_rand();
-		value3 = get_rand();
-		int random = rand(); 
+	key3 = get_rand();
+	value3 = get_rand();
+	int random = rand(); 
 
-    		hash<string> hash_fn;
-		size_t hash_key1 = hash_fn(key1);
-		size_t hash_key2 = hash_fn(key2);
-		size_t hash_key3 = hash_fn(key3);
+	hash<string> hash_fn;
+	size_t hash_key1 = hash_fn(key1);
+	size_t hash_key2 = hash_fn(key2);
+	size_t hash_key3 = hash_fn(key3);
 
-		// Sockets are hashed on the basis of 5 nodes and direected towards its respetive socket. 
-		auto socket_ind1 = hash_key1 % 5;
-		auto socket_rep_ind1 = socket_ind1 + 1;
-		if (socket_rep_ind1 > 5) socket_rep_ind1 = 0; // socket_rep_ind = (socket_ind + 1) % 5 
-		auto &socket_ref1 = socket_list[socket_ind1];
-		auto &socket_rep1 = socket_list[socket_rep_ind1];
+	// Sockets are hashed on the basis of 5 nodes and direected towards its respetive socket. 
+	auto socket_ind1 = hash_key1 % 5;
+	auto socket_rep_ind1 = socket_ind1 + 1;
+	if (socket_rep_ind1 > 5) socket_rep_ind1 = 0; // socket_rep_ind = (socket_ind + 1) % 5 
+	auto &socket_ref1 = socket_list[socket_ind1];
+	auto &socket_rep1 = socket_list[socket_rep_ind1];
 
-		auto socket_ind2 = hash_key2 % 5;
-		auto socket_rep_ind2 = socket_ind2 + 1;
-		if (socket_rep_ind2 > 5) socket_rep_ind2 = 0;
-		auto &socket_ref2 = socket_list[socket_ind2];
-		auto &socket_rep2 = socket_list[socket_rep_ind2];
+	auto socket_ind2 = hash_key2 % 5;
+	auto socket_rep_ind2 = socket_ind2 + 1;
+	if (socket_rep_ind2 > 5) socket_rep_ind2 = 0;
+	auto &socket_ref2 = socket_list[socket_ind2];
+	auto &socket_rep2 = socket_list[socket_rep_ind2];
 
-		auto socket_ind3 = hash_key3 % 5;
-		auto socket_rep_ind3 = socket_ind3 + 1;
-		if (socket_rep_ind3 > 5) socket_rep_ind3 = 0;
-		auto &socket_ref3 = socket_list[socket_ind3];
-		auto &socket_rep3 = socket_list[socket_rep_ind3];
+	auto socket_ind3 = hash_key3 % 5;
+	auto socket_rep_ind3 = socket_ind3 + 1;
+	if (socket_rep_ind3 > 5) socket_rep_ind3 = 0;
+	auto &socket_ref3 = socket_list[socket_ind3];
+	auto &socket_rep3 = socket_list[socket_rep_ind3];
 
-		try {
-			// 20% probability : PUT
-			if(random % 10 < 2) {
-				data = "commit("+ key1 + "," + value1 + ")";
+	try {
+		// 20% probability : PUT
+		if(random % 10 < 9) {
+			data = "commit("+ key1 + "," + value1 + ")";
+			put_client(*socket_ref1, *socket_rep1, key1, data);
+			while(false){
+				size_t x = 0; x=+1;
+				if(x == 2){break;}
 				put_client(*socket_ref1, *socket_rep1, key1, data);
-				while(false){
-					size_t x = 0; x=+1;
-					if(x == 2){break;}
-					put_client(*socket_ref1, *socket_rep1, key1, data);
-				}
 			}
-			// 20% probability : M-PUT
-			else if (random % 10 < 4)
-        		{
-				//For every PUT operation, I have to be at all the 6 sockets, if anyone fails all abort.
-				data = "commit("+ key1 + "," + value1 + ")";
-				data2 = "commit("+ key2 + "," + value2 + ")";
-				data3 = "commit("+ key3 + "," + value3 + ")";
-// 				mput_client(*socket_ref1, *socket_ref2, *socket_ref3, *socket_rep1, *socket_rep2, *socket_rep3, key1, key2, key3, data, data2, data3);
-				while(false){
-					size_t x = 0; x=+1;
-					if(x == 2){break;}
-					mput_client(*socket_ref1, *socket_ref2, *socket_ref3, *socket_rep1, *socket_rep2, *socket_rep3, key1, key2, key3, data, data2, data3);
-				}
+		}
+		// 20% probability : M-PUT
+		else if (random % 10 < 4)
+		{
+			//For every PUT operation, I have to be at all the 6 sockets, if anyone fails all abort.
+			data = "commit("+ key1 + "," + value1 + ")";
+			data2 = "commit("+ key2 + "," + value2 + ")";
+			data3 = "commit("+ key3 + "," + value3 + ")";
+			// mput_client(*socket_ref1, *socket_ref2, *socket_ref3, *socket_rep1, *socket_rep2, *socket_rep3, key1, key2, key3, data, data2, data3);
+			while(false){
+				size_t x = 0; x=+1;
+				if(x == 2){break;}
+				mput_client(*socket_ref1, *socket_ref2, *socket_ref3, *socket_rep1, *socket_rep2, *socket_rep3, key1, key2, key3, data, data2, data3);
 			}
-			// 60% probability : GET
-			else {
-				data = "get("+ key1 + ")";
-				get_client(*socket_ref1, *socket_rep1, data);
-			}
-		} 
-		catch (std::exception &e) {
-			std::cerr << e.what() << std::endl;
+		}
+		// 60% probability : GET
+		else {
+			data = "get("+ key1 + ")";
+			get_client(*socket_ref1, *socket_rep1, data);
+		}
+	    } 
+	catch (std::exception &e) {
+		std::cerr << e.what() << std::endl;
 		}
 	}
 	// Close the sockets after done.
@@ -404,12 +407,12 @@ int main(int argc, char *argv[]) {
 	std::thread t[MAX_THREAD];
 	for(int i=0; i<MAX_THREAD; ++i){
 		t[i] = std::thread(worker,servers_ip);
-		cout << "CHECK POINT 1" << i << endl;
+		cout << "Final Thread " << i << endl;
 	} 
 
 	for(int i=0; i<MAX_THREAD; ++i){
 		t[i].join();
-		std::cout << "Thread :" << i << endl;
+		std::cout << "Thread: " << i << endl;
 	}
 	
 	std::cout << std::endl;
