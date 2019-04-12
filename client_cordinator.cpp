@@ -48,7 +48,7 @@ bool read(tcpsock &socket){
 	flag = 1;
 	while (recd < 4) {
 		char buf[256];
-		//memset(buf, 0, 256); // Empty the buffer evereytime.
+		memset(buf, 0, 256); // Empty the buffer evereytime.
 		string buf_str;
 		// Recieve and read reply from the Server.
 		boost::system::error_code ignored_error; 
@@ -76,7 +76,6 @@ bool read(tcpsock &socket){
 			else if(buf_str == "true"){
 				flag = 1;
 			}
-			buf_str = "";
 		} 
 	}
 	return flag;
