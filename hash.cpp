@@ -115,7 +115,6 @@ string mput_commit(myHash_List mylist, string key, string value) {
  cerr << "Inside Commit Function" << endl;
  size_t hash_key = hash_fn(key);
  unsigned int hashIdx = hash_key % 10000;
- cerr << "Locked HashIdx Found" << endl;
 
  p_end = new Node();
  //cerr << "address of p_end: " << (int)p_end << endl;
@@ -125,7 +124,6 @@ string mput_commit(myHash_List mylist, string key, string value) {
  p_end->key = key;
 
  //nonexistent key-value in the row
- cerr << "About to Access" << endl;
  if( NULL == mylist->list[hashIdx]->next ){
    cerr << "Accessed 1" << endl;
   mylist->list[hashIdx]->next = p_end;   
