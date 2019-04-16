@@ -10,19 +10,16 @@
 using namespace std;
 
 std::vector<mutex> mtx(10000);
-//Node* p, q, p_end;
 Node *p,*q,*p_end;
 string retval;
 hash<string> hash_fn;
 unsigned int hashIdx;
 
-// Initialize the Hash List
+// Initializing the Hash List
 myHash_List init_hashlist(void){
   unsigned int i;
   myHash_List mylist;
-
   mylist = (Hash_List *)malloc(sizeof(Hash_List)); 
-
   for( i = 0;i < 10000;i++ ){
     mylist->list[i] = (Hash_Header *)malloc(sizeof(Hash_Header)); 
     mylist->list[i]->next = NULL;
@@ -37,8 +34,9 @@ void backup_for_recovery(myHash_List mylist){
   for( i = 0;i < HASH_NUM_MAX;i++){
     p = mylist->list[i]->next;
     while( NULL != p ){
-      // We need to have the cordinator name in future after every operation.
-      // We need to know where we are in the current phase.
+      // The log file in my view should be in both the server and the cordinator. (With different conditions and ways to recover.)
+      // * The cordinator name after every operation.
+      // * Log both the phases for every operation.
       cerr << "ID = " << p->id << " key = " << p->key << " Value = " << p->value << endl;
       p = p->next;
     }        
@@ -57,29 +55,28 @@ string get(myHash_List mylist,string key){
  size_t hash_key = hash_fn(key);
  unsigned int hashIdx = hash_key % 10000;
 
- //Node *p;
  p = mylist->list[hashIdx]->next; 
-   //whether the hashlist is empty
+ // whether the hashlist is empty
  if( NULL == p ){
-   cerr<<"GET Failed"<<endl; 
+   cerr << "GET Failed" << endl; 
    return "Null"; 
  }
-   //whether the first node is the key(searched)
+ // To check if the first node is the key searched by client.
  if(key == p->key){
    string p_val;
    p_val = p->value;
-   cerr<<"GET Successful"<<endl; 
+   cerr << "GET Successful" << endl; 
    return p_val; 
  }
-   //whether second node is empty
+ // To check if the second node is empty.
  if( NULL == p->next ){
    cerr<<"GET Failed"<<endl; 
    return "Null";    
  } 
-   //whether the node is the key(searched)
+ // Whether the node is the key(searched)
  while( key != p->next->key){
    p = p->next;
-       //whether the node is empty
+   // Is the node Empty ?
    if( NULL == p->next ){
      cerr<<"GET Failed"<<endl; 
      return "Null";    
@@ -87,7 +84,6 @@ string get(myHash_List mylist,string key){
  } 
  string p_val2;
  p_val2 = p->value;
- //delete successfully
  cerr<<"GET Successful"<<endl; 
  return p_val2;  
 }
@@ -96,7 +92,7 @@ string get(myHash_List mylist,string key){
 string mput_try(myHash_List mylist,string key){
   //missing condition for two put at the same time try lock, then one of them will lock 
   //and the other will get error in try_lock.
-
+  
   size_t hash_key = hash_fn(key);
   hashIdx = hash_key % 10000;
   //try lock
@@ -107,8 +103,8 @@ string mput_try(myHash_List mylist,string key){
   cerr << "Locked" << endl;
 }
 
-// Commit Phase | Phase 2 will actually commit the operation. 
-string mput_commit(myHash_List mylist, string key, string value) {
+ // Commit Phase | Phase 2 will actually commit the operation. 
+ string mput_commit(myHash_List mylist, string key, string value) {
  // Actually put the thing; same as put(), but it doesn't need to lock the bucket,
  // because we know it's already locked by mput_try
 
@@ -117,31 +113,26 @@ string mput_commit(myHash_List mylist, string key, string value) {
  unsigned int hashIdx = hash_key % 10000;
 
  p_end = new Node();
- //cerr << "address of p_end: " << (int)p_end << endl;
- //p_end = (Node *)malloc(sizeof(Node));
  p_end->next = NULL;
  p_end->value = value;
  p_end->key = key;
 
  //nonexistent key-value in the row
  if( NULL == mylist->list[hashIdx]->next ){
-   cerr << "Accessed 1" << endl;
   mylist->list[hashIdx]->next = p_end;   
   cerr << "Commit Successful" << endl;
   retval = "true";
  }
- cerr << "Accessed 2" << endl;
  //existent key-value in the row
  q = mylist->list[hashIdx]->next;
  while(q){
    p = q;
    q = q->next; 
-   //the key is exsit
-//    if(key == p->key ){
+   // The key exsits.
+   // if(key == p->key ){
    if(key != p->key){
     cerr<<"Commit Failed"<<endl;
     retval = "fals";
-    //mtx[hashIdx].unlock();
     return retval;
    }  
  }
