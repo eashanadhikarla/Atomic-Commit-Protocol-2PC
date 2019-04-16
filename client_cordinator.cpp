@@ -47,22 +47,24 @@ bool read(tcpsock &socket){
 	bool flag;
 	flag = 1;
 	while (recd < 4) {
-		char buf[512];
-		memset(buf, 0, 512); // Empty the buffer evereytime.
+		std::cerr << "entering while loop" << std::endl;
+		char buf[256];
+		memset(buf, 0, 256); // Empty the buffer evereytime.
 		string buf_str;
 		// Recieve and read reply from the Server.
 		boost::system::error_code ignored_error; 
+		std::cerr << "bouta read some" << std::endl;
 		size_t len = socket.read_some(boost::asio::buffer(buf), ignored_error);
-		std::cout << "Buffer length received from Server: " << len << std::endl;
+		std::cerr << "Buffer Length from received from Server: " << len << std::endl;
 		if (len > 0) {
 			recd += len;
 			buf[len] = 0;
-			//cout << buf;
+			//cerr << buf;
 
 			for(int i=0;i<4;++i){
 				buf_str += buf[i];
 			}
-			// std::cout << "Buf_str " << buf_str <<std::endl;
+			// std::cerr << "Buf_str " << buf_str <<std::endl;
 			// Counting the Results for performance measure.
 			if(buf_str == "lock"){
 				flag = 1;
@@ -94,11 +96,11 @@ void get_client(tcpsock &socket_ref1, tcpsock &socket_rep1, string data) {
 	write(socket_ref1, buffer(data), ignored_error);
 
 	bool flag = read(socket_ref1);
-	cout << "GET Successful";
+	cerr << "GET Successful";
 	get_val++;
 
 	gettimeofday(&end_time_s, nullptr);
-	std::cout << std::endl;
+	std::cerr << std::endl;
 	// End Time
 	gettimeofday(&end_time, nullptr);
 	double ex_time = (end_time.tv_sec - start_time.tv_sec)*1000000+(end_time.tv_usec - start_time.tv_usec);
@@ -109,7 +111,7 @@ void get_client(tcpsock &socket_ref1, tcpsock &socket_rep1, string data) {
 	sum_ex_time += ex_time;
 	sum_latency += latency;
 
-	std::cout << std::endl;
+	std::cerr << std::endl;
 }
 
 bool put_client(tcpsock &socket_ref1, tcpsock &socket_rep1, string key1, string data) {
@@ -125,18 +127,18 @@ bool put_client(tcpsock &socket_ref1, tcpsock &socket_rep1, string key1, string 
 	// Write data to the Socket and send it to the Server.
 	// Prepare Phase | Phase 1
 	write(socket_ref1, buffer(try_data1), ignored_error);
-	std::cout << "Prepared Socket Reference : " << socket_ref1.native_handle() << std::endl;
+	std::cerr << "Prepared Socket Reference : " << socket_ref1.native_handle() << std::endl;
 	bool flag = read(socket_ref1);
 	if(flag == 1){
 		write(socket_rep1, buffer(try_data1), ignored_error);
-		std::cout << "Prepared Socket Replication : " << socket_rep1.native_handle() << std::endl;
+		std::cerr << "Prepared Socket Replication : " << socket_rep1.native_handle() << std::endl;
 		flag = read(socket_rep1);
 		if(flag == 1){
 			// Commit Phase | Phase 2
 			write(socket_ref1, buffer(data), ignored_error);
-			std::cout << "Commit Reference : " << socket_ref1.native_handle() << std::endl;
+			std::cerr << "Commit Reference : " << socket_ref1.native_handle() << std::endl;
 			write(socket_rep1, buffer(data), ignored_error);
-			std::cout << "Commit Replication : " << socket_rep1.native_handle() << std::endl;
+			std::cerr << "Commit Replication : " << socket_rep1.native_handle() << std::endl;
 			read(socket_ref1);
 			read(socket_rep1);
 			xBytes += data.length();
@@ -156,7 +158,7 @@ bool put_client(tcpsock &socket_ref1, tcpsock &socket_rep1, string key1, string 
 	}
 	
 	gettimeofday(&end_time_s, nullptr);
-	std::cout << std::endl;
+	std::cerr << std::endl;
 	// End Time
 	gettimeofday(&end_time, nullptr);
 	double ex_time = (end_time.tv_sec - start_time.tv_sec)*1000000+(end_time.tv_usec - start_time.tv_usec);
@@ -167,7 +169,7 @@ bool put_client(tcpsock &socket_ref1, tcpsock &socket_rep1, string key1, string 
 	sum_ex_time += ex_time;
 	sum_latency += latency;
 
-	std::cout << std::endl;
+	std::cerr << std::endl;
 	put_true++;
 	return true;
 }
@@ -296,7 +298,7 @@ bool mput_client(tcpsock &socket_ref1, tcpsock &socket_ref2, tcpsock &socket_ref
 	}
 	
 	gettimeofday(&end_time_s, nullptr);
-	std::cout << std::endl;
+	std::cerr << std::endl;
 	// End Time
 	gettimeofday(&end_time, nullptr);
 	double ex_time = (end_time.tv_sec - start_time.tv_sec)*1000000+(end_time.tv_usec - start_time.tv_usec);
@@ -306,7 +308,7 @@ bool mput_client(tcpsock &socket_ref1, tcpsock &socket_ref2, tcpsock &socket_ref
 	sum_bytes += xBytes;
 	sum_ex_time += ex_time;
 	sum_latency += latency;
-	std::cout << std::endl;
+	std::cerr << std::endl;
 
 	put_true = put_true+6;
 	return true;
@@ -428,31 +430,31 @@ int main(int argc, char *argv[]) {
 	std::thread t[MAX_THREAD];
 	for(int i=0; i<MAX_THREAD; ++i){
 		t[i] = std::thread(worker,servers_ip);
-		cout << "Final Thread " << i << endl; // Checkpoint
+		cerr << "Final Thread " << i << endl; // Checkpoint
 	} 
 
 	for(int i=0; i<MAX_THREAD; ++i){
 		t[i].join();
-		std::cout << "Thread: " << i << endl;
+		std::cerr << "Thread: " << i << endl;
 	}
 	
-	std::cout << std::endl;
+	std::cerr << std::endl;
 
-	std::cout << "******* Performance Measure *******"<< std::endl;
+	std::cerr << "******* Performance Measure *******"<< std::endl;
 
-	std::cout << "PUT Successful (true): " << put_true << std::endl;
-	std::cout << "PUT Failed (false): " << put_false << std::endl;
+	std::cerr << "PUT Successful (true): " << put_true << std::endl;
+	std::cerr << "PUT Failed (false): " << put_false << std::endl;
 	
-	std::cout << "GET Successful: " << get_val << std::endl;
-	std::cout << "GET Failed: " << get_null << std::endl;
+	std::cerr << "GET Successful: " << get_val << std::endl;
+	std::cerr << "GET Failed: " << get_null << std::endl;
 	
-	std::cout << "Total Bytes Transmitted: " << sum_bytes << std::endl;
-	std::cout << "Total Executed Time (seconds): " << sum_ex_time << std::endl;
+	std::cerr << "Total Bytes Transmitted: " << sum_bytes << std::endl;
+	std::cerr << "Total Executed Time (seconds): " << sum_ex_time << std::endl;
 	
-	std::cout << "Latency (seconds): " << sum_latency << std::endl;
-	std::cout << "Throughout: " << 10000 / sum_ex_time << std::endl;
+	std::cerr << "Latency (seconds): " << sum_latency << std::endl;
+	std::cerr << "Throughout: " << 10000 / sum_ex_time << std::endl;
 	
-	std::cout << "Average Latency (microseconds): " << sum_latency * 100 << std::endl;
+	std::cerr << "Average Latency (microseconds): " << sum_latency * 100 << std::endl;
 
 	return 0;
 }
