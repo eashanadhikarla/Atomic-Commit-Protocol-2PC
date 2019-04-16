@@ -143,6 +143,7 @@ string mput_commit(myHash_List mylist, string key, string value) {
     cerr<<"Commit Failed"<<endl;
     retval = "fals";
     mtx[hashIdx].unlock();
+    return retval;
    }  
  }
  p->next = p_end;
