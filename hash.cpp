@@ -136,10 +136,10 @@ string mput_try(myHash_List mylist,string key){
     return retval;
    }  
  }
- //  p->next = p_end;
+ // p->next = p_end;
  p->next = NULL; 
  cerr<<"Commit Successful"<<endl;
- //backup_for_recovery(mylist);
+ // backup_for_recovery(mylist);
  mtx[hashIdx].unlock();
  cerr << "Unlocked" << endl;
  return retval;
@@ -148,7 +148,6 @@ string mput_try(myHash_List mylist,string key){
 // Abort will unlock the respective bucket.
 string mput_abort(myHash_List mylist, string key) {
   // Don't put k/v, just unlock the bucket.
-  
   size_t hash_key = hash_fn(key);
   unsigned int hashIdx = hash_key % 10000;
   
