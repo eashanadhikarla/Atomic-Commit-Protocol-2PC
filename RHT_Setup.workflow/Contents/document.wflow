@@ -1,0 +1,238 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>AMApplicationBuild</key>
+	<string>444.42</string>
+	<key>AMApplicationVersion</key>
+	<string>2.9</string>
+	<key>AMDocumentVersion</key>
+	<string>2</string>
+	<key>actions</key>
+	<array>
+		<dict>
+			<key>action</key>
+			<dict>
+				<key>AMAccepts</key>
+				<dict>
+					<key>Container</key>
+					<string>List</string>
+					<key>Optional</key>
+					<true/>
+					<key>Types</key>
+					<array>
+						<string>com.apple.applescript.object</string>
+					</array>
+				</dict>
+				<key>AMActionVersion</key>
+				<string>1.0.2</string>
+				<key>AMApplication</key>
+				<array>
+					<string>Automator</string>
+				</array>
+				<key>AMParameterProperties</key>
+				<dict>
+					<key>source</key>
+					<dict/>
+				</dict>
+				<key>AMProvides</key>
+				<dict>
+					<key>Container</key>
+					<string>List</string>
+					<key>Types</key>
+					<array>
+						<string>com.apple.applescript.object</string>
+					</array>
+				</dict>
+				<key>ActionBundlePath</key>
+				<string>/System/Library/Automator/Run AppleScript.action</string>
+				<key>ActionName</key>
+				<string>Run AppleScript</string>
+				<key>ActionParameters</key>
+				<dict>
+					<key>source</key>
+					<string>tell application "Terminal"	activate	set currentTab1 to do script "ssh -i \"Eashan.pem\" ec2-user@ec2-13-57-240-141.us-west-1.compute.amazonaws.com"	delay 2	do script "./RHT/threadpool_server" in currentTab1		set currentTab2 to do script "ssh -i \"Eashan.pem\" ec2-user@ec2-52-53-129-234.us-west-1.compute.amazonaws.com"	delay 2	do script "./RHT/threadpool_server" in currentTab2		set currentTab3 to do script "ssh -i \"Eashan.pem\" ec2-user@ec2-54-183-157-221.us-west-1.compute.amazonaws.com"	delay 2	do script "./RHT/threadpool_server" in currentTab3		set currentTab4 to do script "ssh -i \"Eashan.pem\" ec2-user@ec2-13-52-185-71.us-west-1.compute.amazonaws.com"	delay 2	do script "./RHT/threadpool_server" in currentTab4		set currentTab5 to do script "ssh -i \"Eashan.pem\" ec2-user@ec2-13-56-234-0.us-west-1.compute.amazonaws.com"	delay 2	do script "./RHT/threadpool_server" in currentTab5end tell</string>
+				</dict>
+				<key>BundleIdentifier</key>
+				<string>com.apple.Automator.RunScript</string>
+				<key>CFBundleVersion</key>
+				<string>1.0.2</string>
+				<key>CanShowSelectedItemsWhenRun</key>
+				<false/>
+				<key>CanShowWhenRun</key>
+				<true/>
+				<key>Category</key>
+				<array>
+					<string>AMCategoryUtilities</string>
+				</array>
+				<key>Class Name</key>
+				<string>RunScriptAction</string>
+				<key>InputUUID</key>
+				<string>4488D88C-842F-41D4-B6EF-D6C429CB81DE</string>
+				<key>Keywords</key>
+				<array>
+					<string>Run</string>
+				</array>
+				<key>OutputUUID</key>
+				<string>E2B4618A-19B9-4816-ABF8-61E9E55925B9</string>
+				<key>UUID</key>
+				<string>C3E2EBA6-B94A-42B7-B9A7-6AE79D54C4C9</string>
+				<key>UnlocalizedApplications</key>
+				<array>
+					<string>Automator</string>
+				</array>
+				<key>arguments</key>
+				<dict>
+					<key>0</key>
+					<dict>
+						<key>default value</key>
+						<string>on run {input, parameters}
+	
+	(* Your script goes here *)
+	
+	return input
+end run</string>
+						<key>name</key>
+						<string>source</string>
+						<key>required</key>
+						<string>0</string>
+						<key>type</key>
+						<string>0</string>
+						<key>uuid</key>
+						<string>0</string>
+					</dict>
+				</dict>
+				<key>conversionLabel</key>
+				<integer>0</integer>
+				<key>isViewVisible</key>
+				<true/>
+				<key>location</key>
+				<string>471.500000:299.000000</string>
+				<key>nibPath</key>
+				<string>/System/Library/Automator/Run AppleScript.action/Contents/Resources/Base.lproj/main.nib</string>
+			</dict>
+			<key>isViewVisible</key>
+			<true/>
+		</dict>
+		<dict>
+			<key>action</key>
+			<dict>
+				<key>AMAccepts</key>
+				<dict>
+					<key>Container</key>
+					<string>List</string>
+					<key>Optional</key>
+					<true/>
+					<key>Types</key>
+					<array>
+						<string>com.apple.applescript.object</string>
+					</array>
+				</dict>
+				<key>AMActionVersion</key>
+				<string>1.0.2</string>
+				<key>AMApplication</key>
+				<array>
+					<string>Automator</string>
+				</array>
+				<key>AMParameterProperties</key>
+				<dict>
+					<key>source</key>
+					<dict/>
+				</dict>
+				<key>AMProvides</key>
+				<dict>
+					<key>Container</key>
+					<string>List</string>
+					<key>Types</key>
+					<array>
+						<string>com.apple.applescript.object</string>
+					</array>
+				</dict>
+				<key>ActionBundlePath</key>
+				<string>/System/Library/Automator/Run AppleScript.action</string>
+				<key>ActionName</key>
+				<string>Run AppleScript</string>
+				<key>ActionParameters</key>
+				<dict>
+					<key>source</key>
+					<string>tell application "Terminal"	set currentTab6 to do script "ssh -i \"Eashan.pem\" ec2-user@ec2-13-57-240-141.us-west-1.compute.amazonaws.com"	delay 2	do script "./RHT/client_cordinator" in currentTab6		set currentTab7 to do script "ssh -i \"Eashan.pem\" ec2-user@ec2-52-53-129-234.us-west-1.compute.amazonaws.com"	delay 2	do script "./RHT/client_cordinator" in currentTab7		set currentTab8 to do script "ssh -i \"Eashan.pem\" ec2-user@ec2-54-183-157-221.us-west-1.compute.amazonaws.com"	delay 2	do script "./RHT/client_cordinator" in currentTab8		set currentTab8 to do script "ssh -i \"Eashan.pem\" ec2-user@ec2-13-52-185-71.us-west-1.compute.amazonaws.com"	delay 2	do script "./RHT/client_cordinator" in currentTab8		set currentTab10 to do script "ssh -i \"Eashan.pem\" ec2-user@ec2-13-56-234-0.us-west-1.compute.amazonaws.com"	delay 2	do script "./RHT/client_cordinator" in currentTab10end tell</string>
+				</dict>
+				<key>BundleIdentifier</key>
+				<string>com.apple.Automator.RunScript</string>
+				<key>CFBundleVersion</key>
+				<string>1.0.2</string>
+				<key>CanShowSelectedItemsWhenRun</key>
+				<false/>
+				<key>CanShowWhenRun</key>
+				<true/>
+				<key>Category</key>
+				<array>
+					<string>AMCategoryUtilities</string>
+				</array>
+				<key>Class Name</key>
+				<string>RunScriptAction</string>
+				<key>InputUUID</key>
+				<string>26A9FAE7-EB41-4B52-BDB0-1E750D363759</string>
+				<key>Keywords</key>
+				<array>
+					<string>Run</string>
+				</array>
+				<key>OutputUUID</key>
+				<string>3812DD9D-444C-46CA-B80B-03E108545491</string>
+				<key>UUID</key>
+				<string>7D69296D-2D58-4516-99F0-640CEAE36C71</string>
+				<key>UnlocalizedApplications</key>
+				<array>
+					<string>Automator</string>
+				</array>
+				<key>arguments</key>
+				<dict>
+					<key>0</key>
+					<dict>
+						<key>default value</key>
+						<string>on run {input, parameters}
+	
+	(* Your script goes here *)
+	
+	return input
+end run</string>
+						<key>name</key>
+						<string>source</string>
+						<key>required</key>
+						<string>0</string>
+						<key>type</key>
+						<string>0</string>
+						<key>uuid</key>
+						<string>0</string>
+					</dict>
+				</dict>
+				<key>conversionLabel</key>
+				<integer>0</integer>
+				<key>isViewVisible</key>
+				<true/>
+				<key>location</key>
+				<string>471.500000:544.000000</string>
+				<key>nibPath</key>
+				<string>/System/Library/Automator/Run AppleScript.action/Contents/Resources/Base.lproj/main.nib</string>
+			</dict>
+			<key>isViewVisible</key>
+			<true/>
+		</dict>
+	</array>
+	<key>connectors</key>
+	<dict>
+		<key>C7145578-2D1A-4BC7-BA07-C27ACFE2D3AD</key>
+		<dict>
+			<key>from</key>
+			<string>C3E2EBA6-B94A-42B7-B9A7-6AE79D54C4C9 - C3E2EBA6-B94A-42B7-B9A7-6AE79D54C4C9</string>
+			<key>to</key>
+			<string>7D69296D-2D58-4516-99F0-640CEAE36C71 - 7D69296D-2D58-4516-99F0-640CEAE36C71</string>
+		</dict>
+	</dict>
+	<key>workflowMetaData</key>
+	<dict>
+		<key>workflowTypeIdentifier</key>
+		<string>com.apple.Automator.workflow</string>
+	</dict>
+</dict>
+</plist>
