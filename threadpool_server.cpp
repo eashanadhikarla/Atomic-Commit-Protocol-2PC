@@ -147,7 +147,7 @@ private:
 };
 
 int main(int argc, char* argv[]){
-    AsioThreadPool pool(1);
+    AsioThreadPool pool(40); // Launching 40 threads for 40 clients.
 	unsigned short port = 9000;
 
     // boost::asio::io_context io_service;
