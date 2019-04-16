@@ -139,7 +139,8 @@ string mput_commit(myHash_List mylist, string key, string value) {
    p = q;
    q = q->next; 
    //the key is exsit
-   if(key == p->key ){
+//    if(key == p->key ){
+   if(key != p->key){
     cerr<<"Commit Failed"<<endl;
     retval = "fals";
     //mtx[hashIdx].unlock();
