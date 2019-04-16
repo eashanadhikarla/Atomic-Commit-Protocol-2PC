@@ -410,12 +410,11 @@ void worker(std::vector<string> servers_ip){
 }
 
 int main(int argc, char *argv[]) {
-
-	// string ports = "9000"; 
+ 
 	std::vector<string> servers_ip;
-	// Read the list of Hostnames from a text file.
+	
 	ifstream file;
-	file.open("Hosttnames.txt", ios::in);
+	file.open("Hosttnames.txt", ios::in); // Read the list of Hostnames from a text file.
 	string eachLine;
 	while(getline(file,eachLine)){
 		if(eachLine.empty()){
