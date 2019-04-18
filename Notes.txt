@@ -16,3 +16,8 @@
 Error Recovery during two-phase commit
 - If the participant fails after coompleting the phase 1, the Transaction Manager has ensures that the transaction is commited, 
 by periodically attempting to commit. 
+
+CAP Theorem:
+- My project supports Consistency and Availability but not Partition-Tolerance. The reason is Consistency is achieved by 
+correctly building the two phase commit protocol and Availability in my case is achieved by the AWS as I am launching my 
+instances at AWS.
