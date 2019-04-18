@@ -8,3 +8,11 @@
     Do multi-threading on both client and server side.
     Need to include log files on the cordinator side as well.
     Implement the retry condition on fail. (Implemented need to be verified.)
+
+3rd Draft:
+    Do multithreading on the client side.
+    Create logs on the client side.
+
+Error Recovery during two-phase commit
+- If the participant fails after coompleting the phase 1, the Transaction Manager has ensures that the transaction is commited, 
+by periodically attempting to commit. 
