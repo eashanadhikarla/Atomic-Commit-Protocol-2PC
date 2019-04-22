@@ -11,7 +11,7 @@
 
 using namespace std;
 using namespace boost::asio;
-#define BUF_SIZE 256
+#define BUF_SIZE 5000 //256
 
 typedef boost::asio::ip::tcp::socket tcpsock;
 boost::asio::io_service io_serv;
@@ -395,8 +395,8 @@ void worker(std::vector<string> servers_ip){
 		else {
 			data = "get("+ key1 + ")";
 			get_client(*socket_ref1, *socket_rep1, data);
-		}
-	    } 
+			}
+		} 
 	catch (std::exception &e) {
 		std::cerr << e.what() << std::endl;
 		}
